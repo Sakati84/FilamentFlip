@@ -1,0 +1,17 @@
+{
+    "CardCount": 32,
+  "MenuItems": [
+    {
+      "Name": "Starter",
+      "CardNumber": 0
+    },
+    {
+      "Name": "Beginner",
+      "CardNumber": 8
+    },
+    {
+      "Name": "Advanced",
+      "CardNumber": 16
+    }
+  ]
+}

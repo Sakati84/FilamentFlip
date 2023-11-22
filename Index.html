@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width minimum-scale=1.0 maximum-scale=1.0 user-scalable=no" />
+  <title>FilamentFlip</title>
+
+  <script type="text/javascript" src="pushbar.js"></script>
+  <script type="text/javascript" src="screenfull.js"></script>
+  <link rel="stylesheet" type="text/css" href="pushbar.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+<style>
+	html, body 
+	{
+		margin: 0;
+		height: 100%;
+		width: 100%;
+		overflow: hidden;
+		background-color: #282828;
+	}
+</style>
+
+  <script type="text/javascript">
+  	
+	levelIndex = 0; 
+	showSolution = false;
+	settings = [];
+
+	function setCookie(cname, cvalue) 
+	{
+		const d = new Date();
+		d.setTime(d.getTime() + (1000 * 24 * 60 * 60 * 1000));
+		let expires = "expires="+d.toUTCString();
+		document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	}
+
+	function getCookie(cname, defaultValue) 
+	{
+		let name = cname + "=";
+		let ca = document.cookie.split(';');
+		for(let i = 0; i < ca.length; i++) {
+			let c = ca[i];
+			while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+			}
+			if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+			}
+		}
+		return defaultValue;
+	}
+	
+	function loadCard(Index)
+	{
+		this.levelIndex = Index;
+		console.log("cardnumber: " + levelIndex);
+
+		var img = document.getElementById("cardimage");
+		img.src = "./Cards/Card_" + String(levelIndex + 1).padStart(2,'0') + ".jpg";
+
+		//cache next or prev & solution
+		if(levelCount-2 > levelIndex)
+		{
+			imgNext = document.createElement("img");
+			imgNext.src = "./Cards/Card_" + String(levelIndex + 2).padStart(2,'0') + ".jpg";
+		}
+
+		if(levelIndex-1 > 0)
+		{
+			imgPrev = document.createElement("img");
+			imgPrev.src = "./Cards/Card_" + String(levelIndex).padStart(2,'0') + ".jpg";
+		}
+
+		showSolution = false;
+
+		setCookie("levelIndex", levelIndex);
+	}
+
+	function loadSolution(Index)
+	{
+		this.levelIndex = Index;
+		console.log("cardnumber: " + levelIndex);
+
+		var img = document.getElementById("cardimage");
+		img.src = "./Cards/Solution_" + String(levelIndex + 1).padStart(2,'0') + ".jpg";
+	}
+
+	function nextLevel()
+	{
+		if(levelCount-1 > levelIndex) levelIndex++;
+		loadCard(levelIndex)
+		updateArrows();
+	}
+
+	function prevLevel()
+	{
+		if(levelIndex > 0) levelIndex--;
+		loadCard(levelIndex)
+		updateArrows();
+	}
+
+	function toggleSolution()
+	{
+		showSolution = !showSolution;
+
+		if(showSolution) loadSolution(levelIndex);
+		else loadCard(levelIndex);
+	}
+
+	function updateArrows()
+	{
+		if(levelIndex == levelCount-1) document.getElementById("arrowright").style.visibility = "hidden";
+		else document.getElementById("arrowright").style.visibility = "visible";
+
+		if(levelIndex == 0) document.getElementById("arrowleft").style.visibility = "hidden";
+		else document.getElementById("arrowleft").style.visibility = "visible";
+	}
+
+	function createMenu()
+	{
+		pushbar = new Pushbar({ blur:false, overlay:true, });
+
+		menu = document.getElementById("menu");
+
+		for(i=0; i<settings.MenuItems.length; i++)
+		{
+			menuItem = document.createElement("li");
+			menuItem.innerHTML = settings.MenuItems[i].Name;
+			menuItem.id = i;
+			menuItem.onclick = function() { menuClick(this.id); };
+			
+			menu.appendChild(menuItem);
+		}
+	}
+
+	function menuClick(id)
+	{
+		loadCard(settings.MenuItems[id].CardNumber);
+		updateArrows();
+		pushbar.close();
+
+				//console.log(`Fullscreen mode: ${screenfull.isFullscreen ? 'enabled' : 'disabled'}`);
+	}
+
+   </script>
+	 
+</head>
+<body>
+
+<section id="container" class="container">
+	<div id="main", style="width:100%; height:100%;">
+
+		<!-- Card -->
+		<div id="CardMain", style="position:absolute; top:0px; left:0px; margin: 0px; width:100%; height:100%; margin: auto;">
+			<script type="text/javascript">
+
+			//load level data
+			fetch('./Settings.json')
+			.then((response) => response.json())
+			.then((json) => 
+			{ 
+				settings = json; 
+				levelCount = settings.CardCount;
+
+				levelIndex = parseInt(getCookie("levelIndex", 0));
+
+				loadCard(levelIndex); 
+				updateArrows();
+				createMenu();
+			});
+
+			</script>
+
+			<div data-pushbar-id="mypushbar1" data-pushbar-direction="left">
+				<div class="title"><span data-pushbar-close class="close push_right"></span> Close</div>
+				<ul id="menu" class="menu", style="padding-inline-start: 0px;">
+				</ul>
+			</div>
+
+			<img id="cardimage", style="object-fit: contain; height: 100%; width: 100%; display:block; margin-left:auto; margin-right:auto;">
+
+			<img id="menuButton", src="Menu.png", onclick="pushbar.open('mypushbar1')", style="opacity: 0.5; position: absolute; top: 20px; left: 20px; width: 50px; height: 50px;">
+			<img id="fullscreen", src="Fullscreen.png", onclick="screenfull.toggle(document.getElementById('container'))", style="opacity: 0.5; position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;">
+			<img id="arrowleft", src="Arrow_Left.png", onclick="prevLevel()", style="opacity: 0.5; position: absolute; left: 20px; width: 40px; height: 61px; margin: 0; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
+			<img id="arrowright", src="Arrow_Right.png", onclick="nextLevel()", style="opacity: 0.5; position: absolute; right: 20px; width: 40px; height: 61px;margin: 0; top: 50%; -ms-transform: translateY(-50%); transform: translateY(-50%);">
+		</div>
+
+		<!--SETTINGS
+		<div id="Settings", width="560, style="display: none;">
+			<div id="colors">
+				<br />
+				<br />
+				<br />
+				<br />
+				<div id="levelnumber" style="font-size:52px; font-family:Trebuchet MS, sans-serif;"> <b><center>Marble Colors</center></b> </div>
+				<table style="font-size:32px; font-family:Trebuchet MS, sans-serif; margin-left: auto;margin-right: auto;", width="330px">
+					<tr>
+						<td> <label for="favcolor1">Marble A (12x):</label> </td>
+						<td> <input type="color" id="favcolor1" name="favcolor1" value="#ff0000"> </td>
+					</tr>
+					<tr>
+						<td> <label for="favcolor2">Marble B (10x):</label> </td>
+							<td> <input type="color" id="favcolor2" name="favcolor2" value="#ff0000"> </td>
+					</tr>
+					<tr>
+						<td> <label for="favcolor3">Marble C (8x):</label> </td>
+							<td> <input type="color" id="favcolor3" name="favcolor3" value="#ff0000"> </td>
+					</tr>
+					<tr>
+						<td> <label for="favcolor4">Marble D (6x):</label> </td>
+						<td> <input type="color" id="favcolor4" name="favcolor4" value="#ff0000"> </td>
+					</tr>
+				</table>
+
+				<script type="text/javascript">
+					var c1 = document.getElementById("favcolor1");
+					c1.value = getCookie("color1", "#ff0000");
+					c1.addEventListener('change', (event) => { setCookie("color1", c1.value) });
+
+					var c2 = document.getElementById("favcolor2");
+					c2.value = getCookie("color2", "#0000ff");
+					c2.addEventListener('change', (event) => { setCookie("color2", c2.value) });
+
+					var c3 = document.getElementById("favcolor3");
+					c3.value = getCookie("color3", "#ffff00");
+					c3.addEventListener('change', (event) => { setCookie("color3", c3.value) });
+
+					var c4 = document.getElementById("favcolor4");
+					c4.value = getCookie("color4", "#ffffff");
+					c4.addEventListener('change', (event) => { setCookie("color4", c4.value) });
+				</script>
+			</div>
+		</div>-->
+	</div>
+</section>
+
+</body>
+</html>
