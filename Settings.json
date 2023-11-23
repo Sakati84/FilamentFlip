@@ -1,25 +1,29 @@
 {
-    "CardCount": 50,
+    "CardCount": 60,
   "MenuItems": [
     {
-      "Name": "Beginner",
+      "Name": "Starter",
       "CardNumber": 0
     },
     {
-      "Name": "Intermediate",
+      "Name": "Beginner",
       "CardNumber": 10
     },
     {
-      "Name": "Advanced",
+      "Name": "Intermediate",
       "CardNumber": 20
     },
     {
-      "Name": "Expert",
+      "Name": "Advanced",
       "CardNumber": 30
     },
     {
-      "Name": "Master",
+      "Name": "Expert",
       "CardNumber": 40
+    },
+    {
+      "Name": "Master",
+      "CardNumber": 50
     }
   ]
 }
